@@ -1,0 +1,59 @@
+# Built application and library files
+*.apk
+*.aar
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java / Kotlin class files
+*.class
+
+# Generated and build directories
+build/
+.gradle/
+.kotlin/
+bin/
+gen/
+out/
+
+# Android Studio and Gradle tools
+captures/
+.externalNativeBuild/
+.cxx/
+.navigation/
+
+# Local configuration file (contains SDK path and local developer machine settings)
+local.properties
+
+# IntelliJ IDEA / Android Studio project files
+*.iml
+.idea/
+*.ipr
+*.iws
+
+# Keystore and signing keys
+*.jks
+*.keystore
+*.key
+
+# Firebase config — each developer supplies their own from the Firebase console.
+# Do NOT commit real google-services.json. The committed *.template files show the shape.
+parent/google-services.json
+child/google-services.json
+
+# Node (Cloud Functions + rules tests)
+node_modules/
+firebase/**/node_modules/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
+
+# Log Files
+*.log
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini

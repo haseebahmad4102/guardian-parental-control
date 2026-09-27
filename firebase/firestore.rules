@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// Phase 2 rules: parent auth + anonymous child devices bound through pairing.
+//
+// Trust model: the parent (email/password) owns and creates device + pairing docs. The child
+// device authenticates anonymously and may only (a) read a pairing doc, (b) flip it PENDING ->
+// CLAIMED stamping its own uid, and (c) stamp its uid onto the matching, still-unclaimed device
+// doc exactly once. Knowledge of the (random UUID) deviceId comes only via the pairing code, so
+// claiming is effectively gated by the code.
+//
+// KNOWN HARDENING TODO: claiming is two client writes, not atomic against a forged deviceId. A
+// Cloud Function performing the claim server-side (or a code->deviceId lookup rule) closes this.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // users/{parentUid} — a parent may read/write only their own profile document.
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /devices/{deviceId} {
+      allow create: if signedIn() && request.resource.data.parentUid == request.auth.uid;
+
+      allow read: if signedIn() && (
+        resource.data.parentUid == request.auth.uid ||
+        resource.data.childUid == request.auth.uid
+      );
+
+      // Parent owns the document outright.
+      allow update, delete: if signedIn() && resource.data.parentUid == request.auth.uid;
+
+      // Child claim: stamp the claiming child's uid onto a still-unclaimed device, once.
+      allow update: if signedIn()
+        && resource.data.paired == false
+        && resource.data.childUid == ''
+        && request.resource.data.childUid == request.auth.uid
+        && request.resource.data.paired == true
+        && request.resource.data.parentUid == resource.data.parentUid
+        && request.resource.data.deviceId == resource.data.deviceId;
+
+      // Sub-collections (usage, notifications, policies, commands): parent OR the bound child.
+      match /{sub}/{doc} {
+        allow read, write: if signedIn() && (
+          get(/databases/$(database)/documents/devices/$(deviceId)).data.parentUid == request.auth.uid ||
+          get(/databases/$(database)/documents/devices/$(deviceId)).data.childUid == request.auth.uid
+        );
+      }
+    }
+
+    match /pairing/{code} {
+      allow create: if signedIn() && request.resource.data.parentUid == request.auth.uid;
+      allow read: if signedIn();
+      allow delete: if signedIn() && resource.data.parentUid == request.auth.uid;
+
+      // Child claim: PENDING -> CLAIMED, stamping own uid; parent/device fields immutable.
+      allow update: if signedIn()
+        && resource.data.status == 'PENDING'
+        && request.resource.data.status == 'CLAIMED'
+        && request.resource.data.childUid == request.auth.uid
+        && request.resource.data.parentUid == resource.data.parentUid
+        && request.resource.data.deviceId == resource.data.deviceId;
+    }
+  }
+}

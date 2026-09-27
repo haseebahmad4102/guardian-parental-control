@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Device Admin policy declaration for the standard-permission path. force-lock is what backs
+  DevicePolicyManager.lockNow(). This is the lightweight admin route (user-activated); the full
+  Device Owner path (app hiding, uninstall protection) arrives in Phase 7.
+-->
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <force-lock />
+    </uses-policies>
+</device-admin>

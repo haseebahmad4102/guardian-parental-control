@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Compose supplies the real Material3 color scheme at runtime (see ui/theme).
+      This XML theme only styles the launch window, so a framework parent keeps the
+      dependency surface minimal (no View-system Material Components needed).
+    -->
+    <style name="Theme.Guardian" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
+</resources>

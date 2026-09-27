@@ -1,0 +1,12 @@
+{
+  "name": "guardian-rules-tests",
+  "description": "Firestore security-rules tests (run against the emulator).",
+  "private": true,
+  "scripts": {
+    "test": "firebase emulators:exec --project guardian-test --only firestore \"mocha --timeout 10000 firestore.rules.test.js\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "mocha": "^10.7.3"
+  }
+}
